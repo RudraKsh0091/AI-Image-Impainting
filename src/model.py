@@ -5,7 +5,7 @@ from keras import layers
 def encoder_block(x, filters, apply_batchnorm=True):
     x = layers.Conv2D(filters, kernel_size=4, strides=2, padding='same')(x)
     x = layers.BatchNormalization()(x) if apply_batchnorm else x
-    x = layers.LeakyReLU(alpha=0.2)(x)
+    x = layers.LeakyReLU(negative_slope=0.2)(x)
     return x
 
 def decoder_block(x, skip, filters, apply_dropout=False):
