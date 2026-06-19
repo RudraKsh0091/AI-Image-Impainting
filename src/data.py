@@ -15,6 +15,7 @@ def get_train_val_split(image_dir, num_train=36000, num_val=4000, seed=42):
 
 def add_masks(image, img_size=256, mask_type='combined'):
     def _generate(img):
+        img = img.numpy()
         mask = generate_mask(img_size=img_size, mask_type=mask_type)
         masked_image = img * (1 - mask)
         return masked_image.astype(np.float32), mask.astype(np.float32)
