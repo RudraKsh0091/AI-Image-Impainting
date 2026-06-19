@@ -2,15 +2,15 @@ import tensorflow as tf
 from tensorflow import keras
 from src.data import get_train_val_split, load_dataset
 from src.model import build_unet
-from src.config import *
+from src import config
 
-train_paths, val_paths = get_train_val_split(IMAGE_DIR, num_train=NUM_TRAIN, num_val=NUM_VAL)
+train_paths, val_paths = get_train_val_split(config.IMAGE_DIR, num_train=config.NUM_TRAIN, num_val=config.NUM_VAL)
 
-train_ds = load_dataset(train_paths, img_size=IMG_SIZE, batch_size=BATCH_SIZE, mask_type='combined', fixed_seed=None)
-val_ds = load_dataset(val_paths, img_size=IMG_SIZE, batch_size=BATCH_SIZE, mask_type='combined', fixed_seed=123)
+train_ds = load_dataset(train_paths, img_size=config.IMG_SIZE, batch_size=config.BATCH_SIZE, mask_type='combined', fixed_seed=None)
+val_ds = load_dataset(val_paths, img_size=config.IMG_SIZE, batch_size=config.BATCH_SIZE, mask_type='combined', fixed_seed=123)
 
-model = build_unet(img_size=IMG_SIZE)
-model.compile(optimizer=keras.optimizers.Adam(learning_rate=LEARNING_RATE), loss='mae')
+model = build_unet(img_size=config.IMG_SIZE)
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=config.LEARNING_RATE), loss='mae')
 
 callbacks = [
     keras.callbacks.ModelCheckpoint("best_model.weights.h5", save_best_only=True, save_weights_only=True, monitor='val_loss'),
@@ -18,4 +18,4 @@ callbacks = [
     keras.callbacks.CSVLogger("training_log.csv"),
 ]
 
-history = model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS, callbacks=callbacks)
+history = model.fit(train_ds, validation_data=val_ds, epochs=config.EPOCHS, callbacks=callbacks)
