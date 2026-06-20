@@ -1,6 +1,23 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+from src import losses
+
+class InpaintingModel(keras.Model):
+    def train_step(self, data):
+        (masked_image, mask), image = data
+        with tf.GradientTape() as tape:
+            predictions = self((masked_image, mask), training=True)
+            loss = losses.hole_valid_loss(image, predictions, mask)
+        gradients = tape.gradient(loss, self.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
+        return {"loss": loss}
+    
+    def test_step(self, data):
+        (masked_image, mask), image = data
+        predictions = self((masked_image, mask), training=False)
+        loss = losses.hole_valid_loss(image, predictions, mask)
+        return {"loss": loss}
 
 def encoder_block(x, filters, apply_batchnorm=True):
     x = layers.Conv2D(filters, kernel_size=4, strides=2, padding='same')(x)
@@ -42,4 +59,4 @@ def build_unet(img_size=256):
     # Output:
     output = layers.Conv2DTranspose(3, kernel_size=4, strides=2, padding='same', activation='tanh')(d5)
     
-    return keras.Model(inputs=[masked_image, mask], outputs=output)
+    return InpaintingModel(inputs=[masked_image, mask], outputs=output)
