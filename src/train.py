@@ -1,6 +1,8 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf
 from tensorflow import keras
-import os
 from src.data import get_train_val_split, load_dataset
 from src.model import build_unet
 from src import config
