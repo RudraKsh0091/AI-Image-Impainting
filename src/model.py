@@ -91,7 +91,9 @@ def pconv_decoder_block(x, mask, skip_x, skip_mask, filters, apply_dropout=False
 def build_pconv_unet(img_size=256):
     masked_image = layers.Input(shape=(img_size, img_size, 3))
     mask_3ch = layers.Input(shape=(img_size, img_size, 1))
-    mask_input = layers.Concatenate()([mask_3ch, mask_3ch, mask_3ch])  # broadcast to 3 channels for image conv
+    
+    valid_mask = layers.Lambda(lambda m: 1.0 - m)(mask_3ch)
+    mask_input = layers.Concatenate()([valid_mask, valid_mask, valid_mask])
 
     pc1 = PartialConv2D(64, apply_batchnorm=False)
     e1, m1 = pc1([masked_image, mask_input])
