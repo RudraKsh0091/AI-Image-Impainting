@@ -38,8 +38,9 @@ class PartialConv2D(layers.Layer):
 
         # Avoid divide-by-zero: clip mask_output to a minimum of 1 where it's 0
         mask_ratio = self.kernel_size * self.kernel_size * mask.shape[-1] / (mask_output + 1e-8)
+        mask_ratio = tf.clip_by_value(mask_ratio, 0.0, 10.0)
         mask_ratio = tf.where(mask_output > 0, mask_ratio, tf.zeros_like(mask_ratio))
-
+        
         # Renormalize feature output
         feature_output = feature_output * mask_ratio
 

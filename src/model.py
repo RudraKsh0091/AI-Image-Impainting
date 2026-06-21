@@ -73,9 +73,6 @@ def build_unet(img_size=256):
     
     return InpaintingModel(inputs=[masked_image, mask], outputs=output)
 
-
-# add to src/model.py
-
 from src.partial_conv import PartialConv2D
 
 def pconv_decoder_block(x, mask, skip_x, skip_mask, filters, apply_dropout=False):
