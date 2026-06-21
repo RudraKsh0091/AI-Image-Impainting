@@ -4,6 +4,10 @@ from keras import layers
 from src import losses
 
 class InpaintingModel(keras.Model):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.loss_tracker = keras.metrics.Mean(name="loss")
+
     def train_step(self, data):
         (masked_image, mask), image = data
         with tf.GradientTape() as tape:
@@ -11,13 +15,21 @@ class InpaintingModel(keras.Model):
             loss = losses.hole_valid_loss(image, predictions, mask)
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
-        return {"loss": loss}
-    
+        
+        self.loss_tracker.update_state(loss)
+        return {"loss": self.loss_tracker.result()}
+
     def test_step(self, data):
         (masked_image, mask), image = data
         predictions = self((masked_image, mask), training=False)
         loss = losses.hole_valid_loss(image, predictions, mask)
-        return {"loss": loss}
+        
+        self.loss_tracker.update_state(loss)
+        return {"loss": self.loss_tracker.result()}
+
+    @property
+    def metrics(self):
+        return [self.loss_tracker]
 
 def encoder_block(x, filters, apply_batchnorm=True):
     x = layers.Conv2D(filters, kernel_size=4, strides=2, padding='same')(x)
