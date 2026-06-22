@@ -11,7 +11,7 @@ train_ds = load_dataset(train_paths, img_size=config.IMG_SIZE, batch_size=config
 val_ds = load_dataset(val_paths, img_size=config.IMG_SIZE, batch_size=config.BATCH_SIZE, mask_type='combined', fixed_seed=123)
 
 model = build_pconv_unet(img_size=config.IMG_SIZE)
-model.load_weights("models/best_model_pconv.weights.h5", by_name=True, skip_mismatch=True)
+model.load_weights("models/best_model_pconv.weights.h5", skip_mismatch=True)
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=config.LEARNING_RATE))
 
 callbacks = [
