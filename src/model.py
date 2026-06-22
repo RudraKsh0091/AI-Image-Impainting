@@ -2,28 +2,28 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 from src import losses
+from src.losses import combined_loss, build_vgg_feature_extractor
 
 class InpaintingModel(keras.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.loss_tracker = keras.metrics.Mean(name="loss")
+        self.vgg_extractor = build_vgg_feature_extractor()
 
     def train_step(self, data):
         (masked_image, mask), image = data
         with tf.GradientTape() as tape:
             predictions = self((masked_image, mask), training=True)
-            loss = losses.hole_valid_loss(image, predictions, mask)
+            loss = combined_loss(image, predictions, mask, self.vgg_extractor)
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
-        
         self.loss_tracker.update_state(loss)
         return {"loss": self.loss_tracker.result()}
 
     def test_step(self, data):
         (masked_image, mask), image = data
         predictions = self((masked_image, mask), training=False)
-        loss = losses.hole_valid_loss(image, predictions, mask)
-        
+        loss = combined_loss(image, predictions, mask, self.vgg_extractor)
         self.loss_tracker.update_state(loss)
         return {"loss": self.loss_tracker.result()}
 
