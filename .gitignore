@@ -1,1 +1,7 @@
-
+*.h5
+*.weights.h5
+models/
+last_epoch.txt
+training_log*.csv
+__pycache__/
+*.pyc
